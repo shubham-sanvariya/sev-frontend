@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useCart } from "../context/CartContext";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { totalItems } = useCart();
 
   return (
     <nav className="bg-orange-600 text-white shadow-md">
@@ -33,7 +35,7 @@ export default function Navbar() {
             >
               Cart
               <span className="ml-1 bg-orange-300 text-orange-900 rounded-full px-2 text-xs font-semibold">
-                0
+                {totalItems}
               </span>
             </Link>
           </div>
@@ -98,7 +100,7 @@ export default function Navbar() {
           >
             Cart
             <span className="ml-2 bg-orange-300 text-orange-900 rounded-full px-2 text-xs font-semibold">
-              0
+              {totalItems}
             </span>
           </Link>
         </div>
