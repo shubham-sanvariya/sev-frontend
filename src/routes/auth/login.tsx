@@ -19,7 +19,7 @@ function LoginPage() {
   // --------------------
   // Login mutation
   // --------------------
-  const {mutate, isPending} = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: async (values: LoginInput) => {
       const res = await api.post('/auth/login', values)
       return res.data
@@ -78,42 +78,40 @@ function LoginPage() {
         </div>
       )}
 
-        {/* ---------------- Email ---------------- */}
-        <form onSubmit={(e) => {
-          e.preventDefault();
-        }} className='flex flex-col justify-center gap-3 w-1/2 px-20'>
-          <div className={'text-2xl font-semibold'}>
-            Login
-          </div>
-          <form.Field name='email'>
-            {(field) => (
-              <TextInput
-                name={"email"}
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                error={field.state.meta.errors[0]?.message}
-                withAsterisk
-                leftSectionPointerEvents={'none'}
-                // leftSection={<IconAt style={{ width: rem(16), height: rem(16) }} />}
-                label={"Your Email"}
-                placeholder={'Your Email'}
-              />
-            )}
-          </form.Field>
-          <form.Field name='password'>
-            {(field) => (
-              <PasswordInput
-                name={"password"}
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                error={field.state.meta.errors[0]?.message}
-                withAsterisk
-                // leftSection={<IconLock style={{ width: rem(18), height: rem(18) }} stroke={1.5} />}
-                label={'Password'}
-                placeholder={'Password'}
-              />
-            )}
-          </form.Field>
+      {/* ---------------- Email ---------------- */}
+      <form onSubmit={(e) => {
+        e.preventDefault();
+        form.handleSubmit();
+      }} className='flex flex-col justify-center gap-3 w-1/2 px-20'>
+        <form.Field name='email'>
+          {(field) => (
+            <TextInput
+              name={"email"}
+              value={field.state.value}
+              onChange={(e) => field.handleChange(e.target.value)}
+              error={field.state.meta.errors[0]?.message}
+              withAsterisk
+              leftSectionPointerEvents={'none'}
+              // leftSection={<IconAt style={{ width: rem(16), height: rem(16) }} />}
+              label={"Your Email"}
+              placeholder={'Your Email'}
+            />
+          )}
+        </form.Field>
+        <form.Field name='password'>
+          {(field) => (
+            <PasswordInput
+              name={"password"}
+              value={field.state.value}
+              onChange={(e) => field.handleChange(e.target.value)}
+              error={field.state.meta.errors[0]?.message}
+              withAsterisk
+              // leftSection={<IconLock style={{ width: rem(18), height: rem(18) }} stroke={1.5} />}
+              label={'Password'}
+              placeholder={'Password'}
+            />
+          )}
+        </form.Field>
 
         {/* ---------------- Submit ---------------- */}
         <button
