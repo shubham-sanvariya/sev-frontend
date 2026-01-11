@@ -1,14 +1,26 @@
 import { api } from "@/lib/axios";
+import type { ApiResponse } from "@/types/api";
 import type { LoginInput, SignupInput } from "@/types/schemas/authSchema";
 import type { UserDTO } from "@/types/schemas/userSchema";
 
-export const login = async (values: LoginInput) => {
-    const res = await api.post('/auth/login', values)
-    return res.data as UserDTO;
+
+export const login = async (values: LoginInput): Promise<UserDTO> => {
+    const res = await api.post<ApiResponse<UserDTO>>('/auth/login', values)
+
+    // you still HAVE access to success/message here if needed
+    if (!res.data.success) {
+        throw new Error(res.data.message)
+    }
+
+    return res.data.data
 }
 
-export const signup = async (values : SignupInput) => {
-    const res = await api.post("/auth/signup",values);
+export const signup = async (values: SignupInput): Promise<UserDTO> => {
+    const res = await api.post<ApiResponse<UserDTO>>('/auth/signup', values)
 
-    return res.data as UserDTO;
+    if (!res.data.success) {
+        throw new Error(res.data.message)
+    }
+
+    return res.data.data
 }

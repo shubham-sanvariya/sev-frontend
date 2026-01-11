@@ -4,7 +4,6 @@ import { useForm } from '@tanstack/react-form'
 import { loginSchema } from '@/types/schemas/authSchema'
 import { LoadingOverlay, TextInput, rem, PasswordInput, Button } from '@mantine/core'
 import { handleError } from '@/services/errorService'
-import type { UserDTO } from '@/types/schemas/userSchema'
 import GoogleLogin from '@/components/GoogleLogin'
 import { login } from '@/services/authService'
 
