@@ -54,7 +54,7 @@ export const productSchema = productBaseSchema.transform((data) => ({
 }))
 
 export const productResponseSchema = productBaseSchema.extend({
-    id: z.string(),
+    _id: z.string(),
     createdAt: z.string().optional(),
     updatedAt: z.string().optional(),
 })

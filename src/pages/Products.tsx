@@ -1,75 +1,103 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchAllProducts } from "@/services/productService";
 import { handleError } from "@/services/errorService";
-import { addToCart } from "@/services/cartService";
+import { addToCart, isCartType } from "@/services/cartService";
 import { useState } from "react";
 
 export default function Products() {
-  // const { addItem } = useCart();
   const { data: products = [] } = useQuery({
     queryKey: ["products"],
     queryFn: fetchAllProducts,
   });
-  // Initialize selectedWeight lazily from first product’s first weight
-  const [selectedWeight, setSelectedWeight] = useState(() => products[0]?.weight?.[0] ?? null);
+
+  const [selectedWeight, setSelectedWeight] = useState(
+    () => products[0]?.weight?.[0] ?? null
+  );
 
   const [quantity, setQuantity] = useState(1);
-  
 
   const queryClient = useQueryClient();
 
   const { mutate } = useMutation({
     mutationFn: addToCart,
-    onSuccess: (cart) => {
-      queryClient.setQueryData(["cart"], cart)
-    },
-    onError: (err) => handleError(err, "failed to add to cart")
-  })
+    onSuccess: (res) => {
+      if (!isCartType(res.data)) {
+        //  Guest → save to localStorage
+        const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+        cart.push(res.data);
+        localStorage.setItem("cart", JSON.stringify(cart));
+        queryClient.setQueryData(["cart"], cart);
+      } else {
+        //  Logged-in → update cache with DB cart
+        queryClient.setQueryData(["cart"], res.data);
+      }
 
-  // if (isLoading) return <p className="p-6">Loading products...</p>;
-  // if (isError) return <p className="p-6 text-red-600">Failed to load products</p>;
+    },
+    onError: (err) => handleError(err, "failed to add to cart"),
+  });
+
+  function handleQuantity(operation: "add" | "sub") {
+    setQuantity((prev) => {
+      if (operation === "add") {
+        return Math.min(prev + 1, 30); // cap at 30
+      }
+      if (operation === "sub") {
+        return Math.max(prev - 1, 1); // floor at 1
+      }
+      return prev;
+    });
+  };
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <h2 className="text-3xl font-bold mb-6 text-orange-700">Products</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {products!.map((product) => (
-          <div key={product.id} className="border rounded p-4 shadow">
+        {products.map((product) => (
+          <div key={product._id} className="border rounded p-4 shadow">
             <h3 className="text-xl font-semibold">{product.name}</h3>
             <p className="text-gray-600">{product.description}</p>
             <p className="font-bold mt-2">₹{product.price}</p>
 
             {product.weight.map((item) => (
-              <div 
-              className="flex gap-1 border-s-2 border-black content-normal "
-              onClick={() => {
-                setSelectedWeight(item)
-              }}
+              <div
+                key={`${item.value}-${item.unit}`}
+                className={`flex gap-2 border rounded-md p-2 m-2 cursor-pointer ${selectedWeight?.value === item.value &&
+                    selectedWeight?.unit === item.unit
+                    ? "border-orange-600 bg-orange-50"
+                    : "border-black"
+                  }`}
+                onClick={() => setSelectedWeight(item)}
               >
                 <p>{item.value}</p>
-
                 <p>{item.unit}</p>
               </div>
             ))}
 
-            <div className="flex gap-1">
-              <p onClick={() => setQuantity((prev) => prev + 1)} className="text-2xl">+</p>
-              {quantity}
-              <p onClick={() => setQuantity((prev) => prev - 1)} className="text-2xl">-</p>
+            <div className="flex items-center gap-4 border border-gray-300 rounded-md px-4 py-2 w-fit">
+              <button
+                onClick={() => handleQuantity("sub")}
+                className="text-xl font-bold px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200 transition"
+              >
+                -
+              </button>
+
+              <span className="text-lg font-semibold">{quantity}</span>
+
+              <button
+                onClick={() => handleQuantity("add")}
+                className="text-xl font-bold px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200 transition"
+              >
+                +
+              </button>
             </div>
 
             <button
               onClick={() =>
-                // addItem({
-                //   id: product.id,
-                //   name: product.name,
-                //   price: product.price,
-                // })
                 mutate({
-                  productId: product.id,
+                  productId: product._id,
                   quantity,
-                  selectedWeight
+                  selectedWeight,
                 })
               }
               className="mt-4 bg-orange-600 text-white px-4 py-2 rounded"
@@ -79,6 +107,6 @@ export default function Products() {
           </div>
         ))}
       </div>
-    </div >
+    </div>
   );
 }
